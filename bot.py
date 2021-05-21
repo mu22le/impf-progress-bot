@@ -1,5 +1,3 @@
-import csv
-import urllib.request
 import tweepy
 from datetime import datetime
 import configparser
@@ -16,6 +14,8 @@ ACCESS_SECRET   = twitter_config.get('TWITTER', 'ACCESS_SECRET')
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
+
+#  Mathieu, E., Ritchie, H., Ortiz-Ospina, E. et al. A global database of COVID-19 vaccinations. Nat Hum Behav (2021) 
 url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
 loc = 'Italy'
 
@@ -24,12 +24,17 @@ CONFIG_FILENAME = 'state.cfg'
 config = configparser.ConfigParser()
 config.read(CONFIG_FILENAME)
 
-def generateProgressbar(percentage):
+def generateProgressbar(percentage, herd_immunity=0):
 	num_chars = 15
-	num_filled = round(percentage*num_chars)
+	num_filled = round(percentage*num_chars/100)
 	num_empty = num_chars-num_filled
-	display_percentage = str(round(percentage*100, 1))
-	msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
+	display_percentage = str(round(percentage, 1)).replace('.', ',')
+	progress_bar = f"{'🟩'*num_filled}{'⬜'*num_empty}"
+	if herd_immunity :
+		hi_mark = int(num_chars*herd_immunity)
+		progress_bar = progress_bar[:hi_mark]+'|'+progress_bar[hi_mark:]
+	msg = f'{progress_bar} {display_percentage}%'
+	# msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
 	return msg
 
 def getCurrentdata(url):
@@ -77,8 +82,8 @@ def saveState(data):
 		print("saved cfg")
 
 def generateMessage(data):
-	bar_first = generateProgressbar(float(data.people_vaccinated_per_hundred/100))
-	bar_full = generateProgressbar(float(data.people_fully_vaccinated_per_hundred/100))
+	bar_first = generateProgressbar(float(data.people_vaccinated_per_hundred))
+	bar_full = generateProgressbar(float(data.people_fully_vaccinated_per_hundred),0.7)
 	msg = f'{loc}:\n{bar_first} vaccinated\n{bar_full} fully vaccinated'
 	return msg
 
