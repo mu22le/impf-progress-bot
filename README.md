@@ -1,9 +1,6 @@
 # Impfstatus Fortschritt Twitter Bot
 
-This is the code that runs the account [@impf_progress](https://twitter.com/impf_progress) on Twitter, tweeting German vaccination updates with an ASCII-art style loading bar, inspired by [@year_progress](https://twitter.com/year_progress).
-
->▓▓▓▓▓░░░░░░░░░░ 31,5% Erstimpfung  
->▓░░░░░░░░░░░░░░ 8,8% vollständig geimpft
+This is a somewhat modified version of [@impf_progress](https://twitter.com/impf_progress) it reads its data from ourworldindata.org, so it can easily be modified to tweet the stats for any countr or region.
 
 ## Script Setup
 
@@ -11,7 +8,7 @@ This is the code that runs the account [@impf_progress](https://twitter.com/impf
 - Edit [twitter.cfg](./twitter.cfg) and put in your Twitter Consumer and Access tokens/keys
 - Make sure [state.cfg](./state.cfg) is writable, this is where the last Tweet and its values are stored so to not Tweet repeated messages
 - Change `DRY_RUN = True` in [bot.py](./bot.py) to `False` when you are done testing
-- Install the Tweepy library, using virtualenv
+- Install Tweepy and Pandas, using virtualenv
 
 ```
 # Create venv
@@ -24,7 +21,7 @@ venv\Scripts\activate.bat
 venv\bin\activate
 
 # Install tweepy directly
-pip3 install tweepy
+pip3 install tweepy pandas
 
 # Alternatively, use requirements.txt
 pip install -r requirements.txt
@@ -48,9 +45,7 @@ Running a cronjob with virtualenv:
 
 ## Data Source
 
-The script uses [germany_vaccinations_timeseries_v2.tsv](https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv) from [impfdashboard.de](https://impfdashboard.de/).
-
-> Quelle: impfdashboard.de, RKI, BMG.
+Mathieu, E., Ritchie, H., Ortiz-Ospina, E. et al. A global database of COVID-19 vaccinations. Nat Hum Behav (2021) 
 
 ## License
 
