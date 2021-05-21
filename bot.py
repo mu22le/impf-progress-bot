@@ -17,7 +17,7 @@ auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
 url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
-
+loc = 'Italy'
 
 CONFIG_FILENAME = 'state.cfg'
 
@@ -32,7 +32,7 @@ def generateProgressbar(percentage):
 	msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
 	return msg
 
-def getCurrentdata(url, loc = 'Italy'):
+def getCurrentdata(url):
 	df = pd.read_csv(url)
 	today = df.loc[df.location==loc, 'date'].max()
 	return df.loc[df.location==loc].loc[ df.date==today]
@@ -79,7 +79,7 @@ def saveState(data):
 def generateMessage(data):
 	bar_first = generateProgressbar(float(data.people_vaccinated_per_hundred/100))
 	bar_full = generateProgressbar(float(data.people_fully_vaccinated_per_hundred/100))
-	msg = '{} vaccinated\n{} fully vaccinated'.format(bar_first, bar_full)
+	msg = f'{loc}:\n{bar_first} vaccinated\n{bar_full} fully vaccinated'
 	return msg
 
 def runAll():
