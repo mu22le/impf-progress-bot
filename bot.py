@@ -3,6 +3,7 @@ import urllib.request
 import tweepy
 from datetime import datetime
 import configparser
+import pandas as pd
 
 DRY_RUN = True
 
@@ -15,7 +16,8 @@ ACCESS_SECRET   = twitter_config.get('TWITTER', 'ACCESS_SECRET')
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
-TSV_URL = "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv"
+url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
+
 
 CONFIG_FILENAME = 'state.cfg'
 
@@ -26,18 +28,14 @@ def generateProgressbar(percentage):
 	num_chars = 15
 	num_filled = round(percentage*num_chars)
 	num_empty = num_chars-num_filled
-	display_percentage = str(round(percentage*100, 1)).replace('.', ',')
+	display_percentage = str(round(percentage*100, 1))
 	msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
 	return msg
 
-def getCurrentdata(url):
-	tsvstream = urllib.request.urlopen(url)
-	tsv_file_lines = tsvstream.read().decode('utf-8').splitlines()
-	tsv_data_lines = csv.DictReader(tsv_file_lines, delimiter='\t')
-	# skip to last line
-	for line_dict in tsv_data_lines:
-		pass
-	return line_dict
+def getCurrentdata(url, loc = 'Italy'):
+	df = pd.read_csv(url)
+	today = df.loc[df.location==loc, 'date'].max()
+	return df.loc[df.location==loc].loc[ df.date==today]
 
 def sendTweet(the_tweet):
 	twitter_API = tweepy.API(auth)
@@ -49,21 +47,21 @@ def sendTweet(the_tweet):
 
 def checkIfShouldTweet(data):
 	last_date = datetime.strptime(config.get('LAST_TWEET', 'date'), '%Y-%m-%d')
-	curr_date = datetime.strptime(data.get('date'), '%Y-%m-%d')
-	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data.get('date')))
+	curr_date = datetime.strptime(data.date.values[0], '%Y-%m-%d')
+	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data.date.values[0]))
 
 	if last_date < curr_date:
-		impf_quote_erst_old = float(config.get('LAST_TWEET', 'impf_quote_erst'))
-		impf_quote_voll_old = float(config.get('LAST_TWEET', 'impf_quote_voll'))
-		impf_quote_erst_new = float(data.get('impf_quote_erst'))
-		impf_quote_voll_new = float(data.get('impf_quote_voll'))
+		vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_first'))
+		fully_vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_full'))
+		vaccinated_new = float(data.people_vaccinated_per_hundred)
+		fully_vaccinated_new = float(data.people_fully_vaccinated_per_hundred)
 		
-		print("erst: {} / {}".format(round(impf_quote_erst_old*100, 1), round(impf_quote_erst_new*100, 1)))
-		print("voll: {} / {}".format(round(impf_quote_voll_old*100, 1), round(impf_quote_voll_new*100, 1)))
+		print("vaccinated: {} / {}".format(round(vaccinated_old, 1), round(vaccinated_new, 1)))
+		print("fully: {} / {}".format(round(fully_vaccinated_old, 1), round(fully_vaccinated_new, 1)))
 		
-		if round(impf_quote_erst_old*100, 1) < round(impf_quote_erst_new*100, 1):
+		if round(vaccinated_old, 1) < round(vaccinated_new, 1):
 			return True
-		if round(impf_quote_voll_old*100, 1) < round(impf_quote_voll_new*100, 1):
+		if round(fully_vaccinated_old, 1) < round(fully_vaccinated_new, 1):
 			return True
 		return False
 	else:
@@ -71,21 +69,21 @@ def checkIfShouldTweet(data):
 		return False
 
 def saveState(data):
-	config.set('LAST_TWEET', 'date', data.get('date'))
-	config.set('LAST_TWEET', 'impf_quote_erst', data.get('impf_quote_erst'))
-	config.set('LAST_TWEET', 'impf_quote_voll', data.get('impf_quote_voll'))
+	config.set('LAST_TWEET', 'date', data.date.values[0])
+	config.set('LAST_TWEET', 'vaccinated_first', data.people_vaccinated_per_hundred)
+	config.set('LAST_TWEET', 'vaccinated_full', data.people_fully_vaccinated_per_hundred)
 	with open(CONFIG_FILENAME, 'w') as configfile:
 		config.write(configfile)
 		print("saved cfg")
 
 def generateMessage(data):
-	bar_erst = generateProgressbar(float(data.get('impf_quote_erst')))
-	bar_voll = generateProgressbar(float(data.get('impf_quote_voll')))
-	msg = '{} mind. eine Impfdosis\n{} vollständig Geimpfte'.format(bar_erst, bar_voll)
+	bar_first = generateProgressbar(float(data.people_vaccinated_per_hundred/100))
+	bar_full = generateProgressbar(float(data.people_fully_vaccinated_per_hundred/100))
+	msg = '{} vaccinated\n{} fully vaccinated'.format(bar_first, bar_full)
 	return msg
 
 def runAll():
-	data = getCurrentdata(TSV_URL)
+	data = getCurrentdata(url)
 	should_send = checkIfShouldTweet(data)
 	print("send tweet?", should_send)
 	if should_send:
