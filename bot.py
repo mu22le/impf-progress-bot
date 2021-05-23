@@ -2,6 +2,7 @@ import tweepy
 from datetime import datetime
 import configparser
 import pandas as pd
+from math import isnan
 
 DRY_RUN = True
 
@@ -62,24 +63,28 @@ def loadConf():
 
 
 def checkIfShouldTweet(data):
+	if isnan(data['vaccinated_first']) or isnan(data['vaccinated_full']):
+		print("No data available yet today")
+		return False
+
 	last_date = datetime.strptime(config.get('LAST_TWEET', 'date'), '%Y-%m-%d')
 	curr_date = datetime.strptime(data['date'], '%Y-%m-%d')
 	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data['date']))
 
-	if last_date < curr_date:
-		vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_first'))
-		fully_vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_full'))
-		vaccinated_new = float(data['vaccinated_first'])
-		fully_vaccinated_new = float(data['vaccinated_full'])
-		
-		print("vaccinated: {} / {}".format(round(vaccinated_old, 1), round(vaccinated_new, 1)))
-		print("fully: {} / {}".format(round(fully_vaccinated_old, 1), round(fully_vaccinated_new, 1)))
-		
-		if round(vaccinated_old, 1) < round(vaccinated_new, 1):
-			return True
-		if round(fully_vaccinated_old, 1) < round(fully_vaccinated_new, 1):
-			return True
-		return False
+	vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_first'))
+	fully_vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_full'))
+	vaccinated_new = float(data['vaccinated_first'])
+	fully_vaccinated_new = float(data['vaccinated_full'])
+	
+	print(f"vaccinated: {round(vaccinated_old, 1)} / {round(vaccinated_new, 1)}")
+	print(f"fully: {round(fully_vaccinated_old, 1)} / {round(fully_vaccinated_new, 1)}")
+
+	if last_date != curr_date:
+		return True
+	elif round(vaccinated_old, 1) < round(vaccinated_new, 1):
+		return True
+	elif round(fully_vaccinated_old, 1) < round(fully_vaccinated_new, 1):
+		return True
 	else:
 		print("date is same or older: do not tweet")
 		return False

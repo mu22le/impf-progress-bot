@@ -2,6 +2,7 @@ import tweepy
 from datetime import datetime
 import configparser
 import pandas as pd
+from math import isnan
 
 DRY_RUN = True
 
@@ -54,6 +55,10 @@ def sendTweet(the_tweet):
 	twitter_API.update_status(the_tweet)
 
 def checkIfShouldTweet(data):
+	if isnan(data['vaccinated_first']) or isnan(data['vaccinated_full']):
+		print("No data available yet today")
+		return False
+
 	last_date = datetime.strptime(config.get('LAST_TWEET', 'date'), '%Y-%m-%d')
 	curr_date = datetime.strptime(data['date'], '%Y-%m-%d')
 	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data['date']))
