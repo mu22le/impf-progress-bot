@@ -17,7 +17,6 @@ auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
 #  Mathieu, E., Ritchie, H., Ortiz-Ospina, E. et al. A global database of COVID-19 vaccinations. Nat Hum Behav (2021) 
 url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
-loc = 'Italy'
 
 CONFIG_FILENAME = 'state.cfg'
 
@@ -37,7 +36,7 @@ def generateProgressbar(percentage, herd_immunity=0):
 	# msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
 	return msg
 
-def getCurrentdata(url):
+def getCurrentdata(url, loc):
 	df = pd.read_csv(url)
 	today = df.loc[df.location==loc, 'date'].max()
 	line = df.loc[df.location==loc].loc[ df.date==today]
@@ -56,6 +55,11 @@ def sendTweet(the_tweet):
 		print("DRY RUN not actually sending tweet!")
 		return
 	twitter_API.update_status(the_tweet)
+
+def loadConf():
+	loc = config.get('CONF', 'location')
+	return loc
+
 
 def checkIfShouldTweet(data):
 	last_date = datetime.strptime(config.get('LAST_TWEET', 'date'), '%Y-%m-%d')
@@ -91,21 +95,22 @@ def saveState(data):
 			config.write(configfile)
 			print("saved cfg")
 
-def generateMessage(data):
+def generateMessage(data, loc):
 	bar_first = generateProgressbar(float(data['vaccinated_first']))
-	bar_full = generateProgressbar(float(data['vaccinated_full']),0.7)
+	bar_full = generateProgressbar(float(data['vaccinated_full']))
 	msg = f'{loc}:\n{bar_first} vaccinated\n{bar_full} fully vaccinated'
 	return msg
 
 def runAll():
-	data = getCurrentdata(url)
+	loc = loadConf()
+	data = getCurrentdata(url, loc)
 	should_send = checkIfShouldTweet(data)
 	print("send tweet?", should_send)
 	if should_send:
 		# need to tweet
 		print('send tweet:')
 		print('')
-		progress_msg = generateMessage(data)
+		progress_msg = generateMessage(data, loc)
 		print(progress_msg)
 		print('')
 		sendTweet(progress_msg)
