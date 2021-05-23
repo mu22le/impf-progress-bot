@@ -2,6 +2,8 @@
 
 This is a somewhat modified version of [@impf_progress](https://twitter.com/impf_progress) it reads its data from ourworldindata.org, so it can easily be modified to tweet the stats for any countr or region.
 
+If you want to use local sources (usually more up-to-date) write your own getCurrentdata() function. You can see an example of this in the Italy folder, where I get the data from [covid19-opendata-vaccini](https://github.com/italia/covid19-opendata-vaccini).
+
 ## Script Setup
 
 - Create an app at the [Twitter Developer site](https://developer.twitter.com/) and create app tokens and keys
