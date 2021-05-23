@@ -15,14 +15,12 @@ ACCESS_SECRET   = twitter_config.get('TWITTER', 'ACCESS_SECRET')
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
-
-#  Mathieu, E., Ritchie, H., Ortiz-Ospina, E. et al. A global database of COVID-19 vaccinations. Nat Hum Behav (2021) 
-url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
-
 CONFIG_FILENAME = 'state.cfg'
-
 config = configparser.ConfigParser()
 config.read(CONFIG_FILENAME)
+
+loc = config.get('CONF', 'location')
+url = config.get('CONF', 'url')
 
 def generateProgressbar(percentage, herd_immunity=0):
 	num_chars = 14
@@ -37,10 +35,10 @@ def generateProgressbar(percentage, herd_immunity=0):
 	# msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
 	return msg
 
-def getCurrentdata(url, loc):
+def getCurrentdata(url):
 	df = pd.read_csv(url)
-	today = df.loc[df.location==loc, 'date'].max()
-	line = df.loc[df.location==loc].loc[ df.date==today]
+	latest = df.loc[df.location==loc, 'date'].max()
+	line = df.loc[df.location==loc].loc[ df.date==latest]
 	data = {'date':line.date.values[0],
 			'vaccinated_first': line.people_vaccinated_per_hundred.values[0],
 			'vaccinated_full': line.people_fully_vaccinated_per_hundred.values[0],
@@ -56,11 +54,6 @@ def sendTweet(the_tweet):
 		print("DRY RUN not actually sending tweet!")
 		return
 	twitter_API.update_status(the_tweet)
-
-def loadConf():
-	loc = config.get('CONF', 'location')
-	return loc
-
 
 def checkIfShouldTweet(data):
 	if isnan(data['vaccinated_first']) or isnan(data['vaccinated_full']):
@@ -100,22 +93,21 @@ def saveState(data):
 			config.write(configfile)
 			print("saved cfg")
 
-def generateMessage(data, loc):
+def generateMessage(data):
 	bar_first = generateProgressbar(float(data['vaccinated_first']))
 	bar_full = generateProgressbar(float(data['vaccinated_full']))
 	msg = f'{loc}:\n{bar_first} vaccinated\n{bar_full} fully vaccinated'
 	return msg
 
 def runAll():
-	loc = loadConf()
-	data = getCurrentdata(url, loc)
+	data = getCurrentdata(url)
 	should_send = checkIfShouldTweet(data)
 	print("send tweet?", should_send)
 	if should_send:
 		# need to tweet
 		print('send tweet:')
 		print('')
-		progress_msg = generateMessage(data, loc)
+		progress_msg = generateMessage(data)
 		print(progress_msg)
 		print('')
 		sendTweet(progress_msg)
