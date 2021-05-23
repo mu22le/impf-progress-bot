@@ -1,6 +1,6 @@
-# Impfstatus Fortschritt Twitter Bot
+# Vaccine progress bar Twitter Bot
 
-This is a somewhat modified version of [@impf_progress](https://twitter.com/impf_progress) it reads its data from ourworldindata.org, so it can easily be modified to tweet the stats for any countr or region.
+This is a somewhat modified version of [@impf_progress](https://twitter.com/impf_progress) it reads its data from ourworldindata.org, so it can easily be used to tweet the stats for any country or region.
 
 If you want to use local sources (usually more up-to-date) write your own getCurrentdata() function. You can see an example of this in the Italy folder, where I get the data from [covid19-opendata-vaccini](https://github.com/italia/covid19-opendata-vaccini).
 
