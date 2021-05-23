@@ -2,7 +2,7 @@
 
 This is a somewhat modified version of [@impf_progress](https://twitter.com/impf_progress) it reads its data from ourworldindata.org, so it can easily be used to tweet the stats for any country or region.
 
-If you want to use local sources (usually more up-to-date) write your own getCurrentdata() function. You can see an example of this in the Italy folder, where I get the data from [covid19-opendata-vaccini](https://github.com/italia/covid19-opendata-vaccini).
+If you want to use local sources (usually more up-to-date) write your own getCurrentdata() function. You can see an example of this in tweetbot_it, where I get the data from [covid19-opendata-vaccini](https://github.com/italia/covid19-opendata-vaccini).
 
 ## Script Setup
 
@@ -10,19 +10,11 @@ If you want to use local sources (usually more up-to-date) write your own getCur
 - Edit [twitter.cfg](./twitter.cfg) and put in your Twitter Consumer and Access tokens/keys
 - Make sure [state.cfg](./state.cfg) is writable, this is where the last Tweet and its values are stored so to not Tweet repeated messages
 - Edit [state.cfg](./state.cfg) to select your favourite country/area
-- Change `DRY_RUN = True` in [bot.py](./bot.py) to `False` when you are done testing
-- Install Tweepy and Pandas, using virtualenv
+- Install Tweepy and Pandas
+- Change `DRY_RUN = True` in [run_bot.py](./run_bot.py) to `False` when you are done testing
+
 
 ```
-# Create venv
-py -3 venv venv
-
-# Activate venv: Windows
-venv\Scripts\activate.bat 
-
-# Activate venv: Linux
-venv\bin\activate
-
 # Install tweepy directly
 pip3 install tweepy pandas
 
@@ -33,9 +25,7 @@ pip install -r requirements.txt
 The script can now simply be called like this:
 
 ```
-python bot.py
-# or
-py -3 bot.py
+python run_bot.py
 ```
 
 ## Crontab Setup
@@ -43,7 +33,7 @@ py -3 bot.py
 Running a cronjob with virtualenv:
 
 ```
-0 12 * * * cd /home/you/impf-progress-bot/ && /home/you/impf-progress-bot/venv/bin/python /home/you/impf-progress-bot/bot.py
+0 12 * * * cd /home/you/impf-progress-bot/ && /bin/python /home/you/impf-progress-bot/run_bot.py
 ```
 
 ## Data Source
