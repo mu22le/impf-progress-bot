@@ -3,7 +3,7 @@ from datetime import datetime
 import configparser
 import pandas as pd
 
-DRY_RUN = False
+DRY_RUN = True
 
 twitter_config = configparser.ConfigParser()
 twitter_config.read('twitter.cfg')
