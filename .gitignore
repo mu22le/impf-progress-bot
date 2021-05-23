@@ -1,3 +1,4 @@
 venv/
 twitter.cfg
 .vscode
+__pycache__
