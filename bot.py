@@ -3,7 +3,7 @@ from datetime import datetime
 import configparser
 import pandas as pd
 
-DRY_RUN = True
+DRY_RUN = False
 
 twitter_config = configparser.ConfigParser()
 twitter_config.read('twitter.cfg')
@@ -40,7 +40,14 @@ def generateProgressbar(percentage, herd_immunity=0):
 def getCurrentdata(url):
 	df = pd.read_csv(url)
 	today = df.loc[df.location==loc, 'date'].max()
-	return df.loc[df.location==loc].loc[ df.date==today]
+	line = df.loc[df.location==loc].loc[ df.date==today]
+	data = {'date':line.date.values[0],
+			'vaccinated_first': line.people_vaccinated_per_hundred.values[0],
+			'vaccinated_full': line.people_fully_vaccinated_per_hundred.values[0],
+	}
+
+	print(data)
+	return data
 
 def sendTweet(the_tweet):
 	twitter_API = tweepy.API(auth)
@@ -52,14 +59,14 @@ def sendTweet(the_tweet):
 
 def checkIfShouldTweet(data):
 	last_date = datetime.strptime(config.get('LAST_TWEET', 'date'), '%Y-%m-%d')
-	curr_date = datetime.strptime(data.date.values[0], '%Y-%m-%d')
-	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data.date.values[0]))
+	curr_date = datetime.strptime(data['date'], '%Y-%m-%d')
+	print("date: {} / {}".format(config.get('LAST_TWEET', 'date'), data['date']))
 
 	if last_date < curr_date:
 		vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_first'))
 		fully_vaccinated_old = float(config.get('LAST_TWEET', 'vaccinated_full'))
-		vaccinated_new = float(data.people_vaccinated_per_hundred)
-		fully_vaccinated_new = float(data.people_fully_vaccinated_per_hundred)
+		vaccinated_new = float(data['vaccinated_first'])
+		fully_vaccinated_new = float(data['vaccinated_full'])
 		
 		print("vaccinated: {} / {}".format(round(vaccinated_old, 1), round(vaccinated_new, 1)))
 		print("fully: {} / {}".format(round(fully_vaccinated_old, 1), round(fully_vaccinated_new, 1)))
@@ -74,16 +81,19 @@ def checkIfShouldTweet(data):
 		return False
 
 def saveState(data):
-	config.set('LAST_TWEET', 'date', data.date.values[0])
-	config.set('LAST_TWEET', 'vaccinated_first', data.people_vaccinated_per_hundred)
-	config.set('LAST_TWEET', 'vaccinated_full', data.people_fully_vaccinated_per_hundred)
-	with open(CONFIG_FILENAME, 'w') as configfile:
-		config.write(configfile)
-		print("saved cfg")
+	config.set('LAST_TWEET', 'date', data['date'])
+	config.set('LAST_TWEET', 'vaccinated_first', str(data['vaccinated_first']))
+	config.set('LAST_TWEET', 'vaccinated_full', str(data['vaccinated_full']))
+	if DRY_RUN :
+		print("DRY RUN not actually saving conf!")
+	else:
+		with open(CONFIG_FILENAME, 'w') as configfile:
+			config.write(configfile)
+			print("saved cfg")
 
 def generateMessage(data):
-	bar_first = generateProgressbar(float(data.people_vaccinated_per_hundred))
-	bar_full = generateProgressbar(float(data.people_fully_vaccinated_per_hundred),0.7)
+	bar_first = generateProgressbar(float(data['vaccinated_first']))
+	bar_full = generateProgressbar(float(data['vaccinated_full']),0.7)
 	msg = f'{loc}:\n{bar_first} vaccinated\n{bar_full} fully vaccinated'
 	return msg
 
