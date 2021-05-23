@@ -7,6 +7,7 @@ This is a somewhat modified version of [@impf_progress](https://twitter.com/impf
 - Create an app at the [Twitter Developer site](https://developer.twitter.com/) and create app tokens and keys
 - Edit [twitter.cfg](./twitter.cfg) and put in your Twitter Consumer and Access tokens/keys
 - Make sure [state.cfg](./state.cfg) is writable, this is where the last Tweet and its values are stored so to not Tweet repeated messages
+- Edit [state.cfg](./state.cfg) to select your favourite country/area
 - Change `DRY_RUN = True` in [bot.py](./bot.py) to `False` when you are done testing
 - Install Tweepy and Pandas, using virtualenv
 
