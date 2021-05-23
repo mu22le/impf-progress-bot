@@ -1,8 +1,7 @@
 # from tweetbot.tweetbot import VaxTweetBot
 from tweetbot.tweetbot_it import VaxTweetBotIt
 
-# VaxTweetBot().runAll()
-VaxTweetBotIt().runAll()
-# bot = VaxTweetBotIt()
+DRY_RUN = True
 
-# bot.runAll()
+VaxTweetBot(dry_run = DRY_RUN).runAll()
+# VaxTweetBotIt(dry_run = DRY_RUN).runAll()
