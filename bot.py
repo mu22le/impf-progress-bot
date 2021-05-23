@@ -24,7 +24,7 @@ config = configparser.ConfigParser()
 config.read(CONFIG_FILENAME)
 
 def generateProgressbar(percentage, herd_immunity=0):
-	num_chars = 15
+	num_chars = 14
 	num_filled = round(percentage*num_chars/100)
 	num_empty = num_chars-num_filled
 	display_percentage = str(round(percentage, 1)).replace('.', ',')
