@@ -21,7 +21,7 @@ class VaxTweetBotIt(VaxTweetBot):
                 'vaccinated_full': df.seconda_dose.sum()/italian_pop*100,
         }
         df=pd.read_csv(self.hist_url)
-        fvax_per_day = (df.groupby('data_somministrazione').seconda_dose.sum()).rolling(window=7).mean()[-1]
+        fvax_per_day = (df.groupby('data_somministrazione').seconda_dose.sum()).rolling(window=7).mean()[-2]
         fvax_tot = self.data['vaccinated_full']
         herd_imm_thrs = 0.7
         herd_imm_pop = italian_pop*herd_imm_thrs
