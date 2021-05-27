@@ -29,12 +29,16 @@ class VaxTweetBot():
 
         self.DRY_RUN = dry_run
 
-    def generateProgressbar(self, percentage):
+    def generateProgressbar(self, percentage, color='green'):
+        filled = '🟩' # default is green 
+        if color=='blue' : filled = '🟦'
+        elif color=='yellow' : filled = '🟨'
+        elif color=='red' : filled = '🟥'
         num_chars = 14
         num_filled = round(percentage*num_chars/100)
         num_empty = num_chars-num_filled
         display_percentage = str(round(percentage, 1)).replace('.', ',')
-        progress_bar = f"{'🟩'*num_filled}{'⬜'*num_empty}"
+        progress_bar = f"{filled*num_filled}{'⬜'*num_empty}"
         # if herd_immunity :
         #     hi_mark = int(num_chars*herd_immunity)
         #     progress_bar = progress_bar[:hi_mark]+'|'+progress_bar[hi_mark:]
