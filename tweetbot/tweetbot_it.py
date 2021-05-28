@@ -26,6 +26,13 @@ class VaxTweetBotIt(VaxTweetBot):
         '''
         Get the raw data from the italian public repos and compute
         the dayly stats and the herd immunity date.
+
+        The herd immunity date uses a 7 day rolling average ignoring the last day.
+        It is at best an educated guess given that:
+         - it assumes immunity lasts forever
+         - it does not account for the accelerating pace of vaccinations.
+         - it does not account for vaccine skepticism in the population.
+         - it probably make other assumptions I'm not aware of.
         '''
         # get latest vaccination numbers
         df = pd.read_csv(self.url)
