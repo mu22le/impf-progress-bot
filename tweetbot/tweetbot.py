@@ -86,6 +86,9 @@ class VaxTweetBot():
             return True
         elif round(fully_vaccinated_old, 1) < round(fully_vaccinated_new, 1):
             return True
+        elif self.DRY_RUN == True :
+            print("no new data, but I'll proceed anyway since this is a dry run")
+            return True
         else:
             print("date is same or older: do not tweet")
             return False
