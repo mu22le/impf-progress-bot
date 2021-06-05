@@ -34,7 +34,6 @@ class VaxTweetBotIt(VaxTweetBot):
          - it does not account for the accelerating pace of vaccinations.
          - it does not account for vaccine skepticism in the population.
          - it assumes all vaccines require 2 doses (not true for J&J).
-         - it assumes doses are always spaced by 5 weeks (not true for AZ)
          - it probably make other assumptions I'm not aware of.
         '''
         # get latest vaccination numbers
@@ -56,7 +55,7 @@ class VaxTweetBotIt(VaxTweetBot):
         # (n of people to vaccinate to get to 70%) / (vax speed)
         days_to_herd_imm = round((herd_imm_pop - vax_tot) / vax_per_day)
         # get expected herd immunity day, but print month only
-        herd_imm_date = date.today() + timedelta(days=days_to_herd_imm) + timedelta(weeks=5)
+        herd_imm_date = date.today() + timedelta(days=days_to_herd_imm) 
         locale.setlocale(locale.LC_ALL, "it_IT")
         self.data['herd_imm_date'] = herd_imm_date.strftime("%B %Y")
         self.data['does today'] = df.groupby(
